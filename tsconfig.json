@@ -7,11 +7,16 @@
     "noImplicitAny": true,
     "moduleResolution": "Node",
     "rootDir": "src",
-    "sourceMap": true
+    "sourceMap": true,
+    "baseUrl": "./",
+    "paths": {
+      "@builders/*": ["src/builders/*"],
+      "@packages/*": ["src/packages/*"]
+    }
   },
   "exclude": [
     "./dist.js",
     "./webpack.config.js",
     "./src/packages/**.*"
-  ]
+  ],
 }
