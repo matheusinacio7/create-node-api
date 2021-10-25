@@ -30,6 +30,7 @@
   "homepage": "https://github.com/heyset/boilerplates-node-api#readme",
   "devDependencies": {
     "@types/node": "^16.11.5",
-    "typescript": "^4.4.4"
+    "typescript": "^4.4.4",
+    "webpack": "^5.60.0"
   }
 }
