@@ -1,10 +1,12 @@
 {
   "name": "@heyset/create-node-api",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "Boilerplate for a Node backend app, with error handling middlewares and a loosely coupled layered architecture.",
   "type": "module",
   "main": "index.ts",
-  "bin": "./dist/index.js",
+  "bin": {
+    "create-node-api": "./dist/index.js"
+  },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "create-node-api": "node ./dist/index.js"
