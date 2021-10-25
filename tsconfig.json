@@ -1,0 +1,14 @@
+{
+  "compilerOptions": {
+    "outFile": "./dist.js",
+    "target": "es5",
+    "module": "amd",
+    "allowJs": true,
+    "noImplicitAny": true,
+    "moduleResolution": "Node",
+    "rootDir": "src"
+  },
+  "exclude": [
+    "./dist.js"
+  ]
+}
