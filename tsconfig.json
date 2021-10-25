@@ -2,7 +2,7 @@
   "compilerOptions": {
     "outDir": "./dist/",
     "target": "es6",
-    "module": "es6",
+    "module": "ES2020",
     "allowJs": true,
     "noImplicitAny": true,
     "moduleResolution": "Node",
@@ -12,7 +12,8 @@
     "paths": {
       "@builders/*": ["src/builders/*"],
       "@packages/*": ["src/packages/*"],
-      "@utils/*": ["src/utils/*"]
+      "@utils/*": ["src/utils/*"],
+      "@middlewares/*": ["src/middlewares/*"]
     }
   },
   "exclude": [
