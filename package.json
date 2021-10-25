@@ -1,6 +1,6 @@
 {
   "name": "@heyset/node-api",
-  "version": "0.1.0",
+  "version": "0.0.1",
   "description": "Boierplate for a Node backend app, with error handling middlewares and a loosely coupled layered architecture.",
   "type": "module",
   "main": "index.ts",
