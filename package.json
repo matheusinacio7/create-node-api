@@ -3,7 +3,7 @@
   "version": "0.0.12",
   "description": "Boilerplate for a Node backend app, with error handling middlewares and a loosely coupled layered architecture.",
   "bin": {
-    "create-node-api": "index.js"
+    "create-node-api": "dist.js"
   },
   "main": "index.ts",
   "scripts": {
@@ -22,7 +22,7 @@
   "author": "Matheus \"Set\" Inacio",
   "license": "MIT",
   "files": [
-    "dist"
+    "dist.js"
   ],
   "bugs": {
     "url": "https://github.com/heyset/boilerplates-node-api/issues"
