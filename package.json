@@ -1,8 +1,8 @@
 {
   "name": "@heyset/create-node-api",
-  "version": "0.0.7",
+  "version": "0.0.8",
   "description": "Boilerplate for a Node backend app, with error handling middlewares and a loosely coupled layered architecture.",
-  "main": "./dist/index.js",
+  "main": "index.ts",
   "bin": "./dist/index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -19,6 +19,9 @@
   ],
   "author": "Matheus \"Set\" Inacio",
   "license": "MIT",
+  "files": [
+    "dist"
+  ],
   "bugs": {
     "url": "https://github.com/heyset/boilerplates-node-api/issues"
   },
