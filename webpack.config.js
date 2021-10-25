@@ -19,10 +19,11 @@ export default {
     extensions: ['.tsx', '.ts', '.js'],
   },
   output: {
-    filename: 'dist.js',
+    filename: 'dist.cjs',
     path: new URL('.', import.meta.url).pathname,
   },
   plugins: [
     new webpack.BannerPlugin({ banner: '#! /usr/bin/env node', raw: true }),
   ],
+  target: 'node',
 };

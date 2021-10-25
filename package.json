@@ -4,16 +4,13 @@
   "description": "Boilerplate for a Node backend app, with error handling middlewares and a loosely coupled layered architecture.",
   "type": "module",
   "bin": {
-    "create-node-api": "dist.js"
+    "create-node-api": "dist.cjs"
   },
   "main": "index.ts",
-  "browser": {
-    "child_process": false
-  },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "webpack --mode production",
-    "test:manual": "yarn build && mkdir manual_test && cd manual_test && node ../dist.js"
+    "test:manual": "rm -rf manual_test/ && webpack --mode development && mkdir manual_test && cd manual_test && clear && node ../dist.cjs"
   },
   "repository": {
     "type": "git",

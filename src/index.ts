@@ -10,7 +10,7 @@ async function entry() {
 
   await git.initialize()
     .then(() => {
-      console.log('Repositorio git inicializado com sucesso.');
+      console.log('Git repository initialized successfully.');
     })
     .catch(handleError);
 }

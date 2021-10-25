@@ -6,7 +6,8 @@
     "allowJs": true,
     "noImplicitAny": true,
     "moduleResolution": "Node",
-    "rootDir": "src"
+    "rootDir": "src",
+    "sourceMap": true
   },
   "exclude": [
     "./dist.js",
