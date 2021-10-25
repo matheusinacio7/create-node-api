@@ -1,14 +1,16 @@
 {
   "compilerOptions": {
-    "outFile": "./dist.js",
+    "outDir": "./dist/",
     "target": "es5",
-    "module": "amd",
+    "module": "es6",
     "allowJs": true,
     "noImplicitAny": true,
     "moduleResolution": "Node",
     "rootDir": "src"
   },
   "exclude": [
-    "./dist.js"
+    "./dist.js",
+    "./webpack.config.js",
+    "./src/packages/**.*"
   ]
 }
