@@ -2,13 +2,18 @@
   "name": "@heyset/create-node-api",
   "version": "0.0.12",
   "description": "Boilerplate for a Node backend app, with error handling middlewares and a loosely coupled layered architecture.",
+  "type": "module",
   "bin": {
     "create-node-api": "dist.js"
   },
   "main": "index.ts",
+  "browser": {
+    "child_process": false
+  },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "webpack --mode production"
+    "build": "webpack --mode production",
+    "test:manual": "yarn build && mkdir manual_test && cd manual_test && node ../dist.js"
   },
   "repository": {
     "type": "git",

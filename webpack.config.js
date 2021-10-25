@@ -1,6 +1,7 @@
-const webpack = require('webpack');
+import webpack from 'webpack';
+import { URL } from 'url';
 
-module.exports = {
+export default {
   entry: './src/index.ts',
   module: {
     rules: [
@@ -19,7 +20,7 @@ module.exports = {
   },
   output: {
     filename: 'dist.js',
-    path: __dirname,
+    path: new URL('.', import.meta.url).pathname,
   },
   plugins: [
     new webpack.BannerPlugin({ banner: '#! /usr/bin/env node', raw: true }),
