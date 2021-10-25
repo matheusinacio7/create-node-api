@@ -1,5 +1,9 @@
-import webpack from 'webpack';
+import * as path from 'path';
 import { URL } from 'url';
+
+import webpack from 'webpack';
+
+const dirname = new URL('.', import.meta.url).pathname;
 
 export default {
   entry: './src/index.ts',
@@ -17,10 +21,16 @@ export default {
   },
   resolve: {
     extensions: ['.tsx', '.ts', '.js'],
+    alias: {
+      "@builders": path.resolve(dirname, 'src', 'builders'),
+      "@packages": path.resolve(dirname, 'src', 'packages'),
+      "@utils": path.resolve(dirname, 'src', 'utils'),
+      "@middlewares": path.resolve(dirname, 'src', 'middlewares'),
+    },
   },
   output: {
     filename: 'dist.cjs',
-    path: new URL('.', import.meta.url).pathname,
+    path: dirname,
   },
   plugins: [
     new webpack.BannerPlugin({ banner: '#! /usr/bin/env node', raw: true }),

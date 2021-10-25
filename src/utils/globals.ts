@@ -1,13 +1,15 @@
-import { URL } from 'url';
-
-let workingDirectory : string;
+let scriptBaseDirectory : string;
 
 const globals = {
-  get workingDirectory () {
-    if (workingDirectory) return workingDirectory;
-    workingDirectory = new URL('.', import.meta.url).pathname;
+  get scriptBaseDirectory () {
+    if (scriptBaseDirectory) return scriptBaseDirectory;
+    scriptBaseDirectory = __dirname;
 
-    return workingDirectory;
+    return scriptBaseDirectory;
+  },
+
+  get workingDirectory() {
+    return process.cwd();
   },
 
   dirname: null as string,

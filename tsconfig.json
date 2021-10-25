@@ -19,6 +19,6 @@
   "exclude": [
     "./dist.js",
     "./webpack.config.js",
-    "./src/packages/**.*"
-  ],
+    "./src/packages/",
+  ]
 }
