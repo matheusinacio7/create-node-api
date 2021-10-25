@@ -1,3 +1,5 @@
+const webpack = require('webpack');
+
 module.exports = {
   entry: './src/index.ts',
   module: {
@@ -16,4 +18,7 @@ module.exports = {
     filename: 'dist.js',
     path: __dirname,
   },
+  plugins: [
+    new webpack.BannerPlugin({ banner: '#! /usr/bin/env node', raw: true }),
+  ],
 };
