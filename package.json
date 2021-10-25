@@ -2,7 +2,9 @@
   "name": "@heyset/node-api",
   "version": "0.1.0",
   "description": "Boierplate for a Node backend app, with error handling middlewares and a loosely coupled layered architecture.",
-  "main": "index.js",
+  "type": "module",
+  "main": "index.ts",
+  "bin": "./dist/index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
