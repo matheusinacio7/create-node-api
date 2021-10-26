@@ -2,8 +2,7 @@ import { promises as fs } from 'fs';
 import * as path from 'path';
 import type { Entry, PackageJson } from 'type-fest';
 
-import { spawnPromise } from '@utils/cpPromise';
-import { spawn } from 'child_process';
+import ChildProcess from '@utils/ChildProcess';
 
 import globals from '@utils/globals';
 
@@ -30,29 +29,24 @@ export default class Package {
   }
 
   async addDependency(depName: string, dev = false) {
-    return new Promise<string>((resolve, reject) => {
-      const cp = spawn('yarn', ['info', depName, 'version']);
+    const cp = new ChildProcess('yarn', ['info', depName, 'version']);
 
-      let version : string;
-  
-      cp.stdout.on('data', (chunk) => {
-        const extractedVersion = chunk.toString().match(/\d+\.\d+\.\d+/);
-        if (extractedVersion) {
-          version = extractedVersion;
-        }
-      });
+    let version : string;
 
-      cp.on('close', () => resolve(version));
-
-      cp.on('error', reject);
-    })
-    .then((version) => {
-      if (dev) {
-        this.#object.devDependencies[depName] = '^' + version;
-      } else {
-        this.#object.dependencies[depName] = '^' + version;
+    cp.runningProcess.stdout.on('data', (chunk) => {
+      const extractedVersion = chunk.toString().match(/\d+\.\d+\.\d+/);
+      if (extractedVersion) {
+        version = extractedVersion;
       }
     });
+
+    await cp.execution;
+
+    if (dev) {
+      this.#object.devDependencies[depName] = '^' + version;
+    } else {
+      this.#object.dependencies[depName] = '^' + version;
+    }  
   }
 
   async initializeCoreDependencies() {
@@ -64,7 +58,7 @@ export default class Package {
   }
 
   install() {
-    return spawnPromise('yarn');
+    return new ChildProcess('yarn').execution;
   }
 
   save() {
