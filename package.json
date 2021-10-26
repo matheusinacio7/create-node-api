@@ -1,6 +1,6 @@
 {
   "name": "@heyset/create-node-api",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Boilerplate for a Node backend app, with error handling middleware and a loosely coupled, layered architecture.",
   "type": "module",
   "bin": {
@@ -42,7 +42,9 @@
     "webpack-cli": "^4.9.1"
   },
   "dependencies": {
+    "@types/fs-extra": "^9.0.13",
     "commander": "^8.3.0",
+    "fs-extra": "^10.0.0",
     "inquirer": "^8.2.0"
   }
 }

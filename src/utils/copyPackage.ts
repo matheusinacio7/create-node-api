@@ -1,4 +1,4 @@
-import { promises as fs } from 'fs';
+import fs from 'fs-extra';
 import * as path from 'path';
 import globals from './globals';
 
@@ -13,7 +13,15 @@ export default async function copyPackage(packageName: string, onRoot = false) {
     const sourceFile = path.resolve(sourceDirectory, fileName);
     const targetFile = path.resolve(targetDirectory, fileName);
 
-    return fs.copyFile(sourceFile, targetFile);
+    return fs.copyFile(sourceFile, targetFile).then(() => {
+      // ? rename after copying to prevent npm from changing .gitignore to .npmignore and ignoring .env
+      if (['gitignore', 'env'].includes(fileName)) {
+        return fs.move(
+          targetFile,
+          path.resolve(targetDirectory, '.' + fileName)
+        );
+      }
+    });
   });
 
   return Promise.all(copyPromises);
