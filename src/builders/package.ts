@@ -66,6 +66,6 @@ export default class Package {
   save() {
     const jsonFile = JSON.stringify(this.#object, null, '\t');
 
-    return fs.writeFile(path.resolve(globals.dirname, 'package.json'), jsonFile);
+    return fs.writeFile(path.resolve(globals.workingDirectory, 'package.json'), jsonFile);
   }
 }
