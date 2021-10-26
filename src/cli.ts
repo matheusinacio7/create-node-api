@@ -28,7 +28,7 @@ export default async function entry() {
 
     const program = new Command();
 
-    program.version('0.0.20');
+    program.version('0.0.21');
   
     program.argument('<folder>');
 
