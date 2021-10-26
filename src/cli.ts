@@ -11,15 +11,25 @@ import handleError from '@middlewares/handleError';
 import globals from '@utils/globals';
 import copyPackage from '@utils/copyPackage';
 
-async function mainInterface(program: Command) {
-  console.log('Initializing Git repository.');
+import PackageJson from '@builders/package';
 
-  const dirName = path.resolve(globals.scriptBaseDirectory, program.args[0]);
+async function mainInterface(program: Command) {
+  // console.log('Initializing Git repository.');
+
+  const appName = program.args[0];
+
+  const dirName = path.resolve(globals.scriptBaseDirectory, appName);
   globals.dirname = dirName;
 
   await fs.mkdir(path.resolve(globals.workingDirectory, 'src'));
 
+  const packageJson = new PackageJson({ author: 'Set', name: appName });
+
   await copyPackage('app', true);
+  await packageJson.addDependency('express');
+  await packageJson.addDependency('cors');
+  await packageJson.addDependency('helmet');
+  
   await copyPackage('errors');
 }
 

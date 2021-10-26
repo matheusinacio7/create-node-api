@@ -3,6 +3,9 @@ import * as path from 'path';
 import type { Entry, PackageJson } from 'type-fest';
 
 import { spawnPromise } from '@utils/cpPromise';
+import { spawn } from 'child_process';
+
+import globals from '@utils/globals';
 
 export default class Package {
   #object = {} as PackageJson;
@@ -10,20 +13,47 @@ export default class Package {
   constructor({ author, name } : Pick<PackageJson, 'author' | 'name'>) {
     this.#object.name = name;
     this.#object.author = author;
+    this.#object.main = 'index.ts';
     this.#object.version = '0.1.0';
+    this.#object.license = 'MIT';
+    this.#object.dependencies = {};
+    this.#object.devDependencies = {};
   }
 
-  add([key, value] : Entry<PackageJson>) {
+  add(...[key, value] : Entry<PackageJson>) {
     this.#object[key] = value as never;
+  }
+
+  async addDependency(depName: string, dev = false) {
+    return new Promise<string>((resolve, reject) => {
+      const cp = spawn('yarn', ['info', depName, 'version']);
+
+      let version : string;
+  
+      cp.stdout.on('data', (chunk) => {
+        version = chunk.toString().replace('\n', '');
+      });
+
+      cp.on('close', () => resolve(version));
+
+      cp.on('error', reject);
+    })
+    .then((version) => {
+      if (dev) {
+        this.#object.devDependencies[depName] = '^' + version;
+      } else {
+        this.#object.dependencies[depName] = '^' + version;
+      }
+    });
   }
 
   install() {
     return spawnPromise('yarn');
   }
 
-  save(targetDirname: string) {
+  save() {
     const jsonFile = JSON.stringify(this.#object, null, '\t');
 
-    return fs.writeFile(path.resolve(targetDirname, 'package.json'), jsonFile);
+    return fs.writeFile(path.resolve(globals.dirname, 'package.json'), jsonFile);
   }
 }
