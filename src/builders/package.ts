@@ -16,8 +16,13 @@ export default class Package {
     this.#object.main = 'index.ts';
     this.#object.version = '0.1.0';
     this.#object.license = 'MIT';
+    this.#object.type = 'module';
+    this.#object.scripts = {
+      start: 'ts-node index.ts',
+      dev: 'ts-node-dev index.ts'
+    };
     this.#object.dependencies = {};
-    this.#object.devDependencies = {};
+    this.#object.devDependencies = {};  
   }
 
   add(...[key, value] : Entry<PackageJson>) {
@@ -45,6 +50,13 @@ export default class Package {
         this.#object.dependencies[depName] = '^' + version;
       }
     });
+  }
+
+  async initializeCoreDependencies() {
+    await this.addDependency('ts-node');
+    await this.addDependency('ts-node-dev', true);
+    await this.addDependency('typescript', true);
+    await this.addDependency('@types/node', true);
   }
 
   install() {

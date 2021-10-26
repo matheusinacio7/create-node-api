@@ -1,0 +1,16 @@
+{
+  "compilerOptions": {
+    "target": "es5",
+    "module": "commonjs",
+    "noImplicitAny": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "rootDir": "src",
+    "sourceMap": true,
+    "baseUrl": "./",
+    "paths": {
+      "@errors": ["src/errors"],
+      "@errors/*": ["src/errors/*"]
+    }
+  }
+}

@@ -14,7 +14,12 @@ import copyPackage from '@utils/copyPackage';
 import PackageJson from '@builders/package';
 
 async function mainInterface(program: Command) {
-  // console.log('Initializing Git repository.');
+  console.log('Initializing Git repository.');
+  await git.initialize()
+    .then(() => {
+      console.log('Git repository initialized successfully.');
+    })
+    .catch(handleError);
 
   const appName = program.args[0];
 
@@ -23,7 +28,12 @@ async function mainInterface(program: Command) {
 
   await fs.mkdir(path.resolve(globals.workingDirectory, 'src'));
 
+  console.log('\nInitalizing package.json');
   const packageJson = new PackageJson({ author: 'Set', name: appName });
+  await packageJson.initializeCoreDependencies();
+
+  console.log('\nCreating packages');
+  await copyPackage('config', true);
 
   await copyPackage('app', true);
   await packageJson.addDependency('express');
@@ -31,6 +41,9 @@ async function mainInterface(program: Command) {
   await packageJson.addDependency('helmet');
   
   await copyPackage('errors');
+
+  await packageJson.save();
+  // await packageJson.install();
 }
 
 export default async function entry() {
@@ -38,7 +51,7 @@ export default async function entry() {
 
     const program = new Command();
 
-    program.version('0.0.22');
+    program.version('0.0.23');
   
     program.argument('<folder>');
 
@@ -49,9 +62,4 @@ export default async function entry() {
     handleError(err);
   }
 
-  // await git.initialize()
-  //   .then(() => {
-  //     console.log('Git repository initialized successfully.');
-  //   })
-  //   .catch(handleError);
 };
