@@ -9,6 +9,7 @@ import * as packageJson from '@builders/package';
 import handleError from '@middlewares/handleError';
 
 import globals from '@utils/globals';
+import copyPackage from '@utils/copyPackage';
 
 async function mainInterface(program: Command) {
   console.log('Initializing Git repository.');
@@ -16,21 +17,10 @@ async function mainInterface(program: Command) {
   const dirName = path.resolve(globals.scriptBaseDirectory, program.args[0]);
   globals.dirname = dirName;
 
-  const sourceDirectory = path.resolve(globals.scriptBaseDirectory, 'src', 'packages', 'errors', '_default');
   await fs.mkdir(path.resolve(globals.workingDirectory, 'src'));
-  await fs.mkdir(path.resolve(globals.workingDirectory, 'src', 'errors'));
-  const targetDirectory = path.resolve(globals.workingDirectory, 'src', 'errors');
-  
-  const fileList = await fs.readdir(sourceDirectory);
-  
-  const copyPromises = fileList.map((fileName) => {
-    const sourceFile = path.resolve(sourceDirectory, fileName);
-    const targetFile = path.resolve(targetDirectory, fileName);
 
-    return fs.copyFile(sourceFile, targetFile);
-  });
-
-  await Promise.all(copyPromises);
+  await copyPackage('app', true);
+  await copyPackage('errors');
 }
 
 export default async function entry() {
