@@ -43,6 +43,8 @@ async function mainInterface(program: Command) {
   await copyPackage('errors');
 
   await packageJson.save();
+
+  console.log('\nInstalling dependencies');
   // await packageJson.install();
 }
 
@@ -51,7 +53,7 @@ export default async function entry() {
 
     const program = new Command();
 
-    program.version('0.0.25');
+    program.version('0.0.26');
   
     program.argument('<folder>');
 

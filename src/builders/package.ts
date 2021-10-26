@@ -18,8 +18,8 @@ export default class Package {
     this.#object.license = 'MIT';
     this.#object.type = 'module';
     this.#object.scripts = {
-      start: 'ts-node index.ts',
-      dev: 'ts-node-dev index.ts'
+      start: 'ts-node -r dotenv/config index.ts',
+      dev: 'ts-node-dev -r dotenv/config index.ts'
     };
     this.#object.dependencies = {};
     this.#object.devDependencies = {};  
@@ -57,6 +57,7 @@ export default class Package {
 
   async initializeCoreDependencies() {
     await this.addDependency('ts-node');
+    await this.addDependency('dotenv');
     await this.addDependency('ts-node-dev', true);
     await this.addDependency('typescript', true);
     await this.addDependency('@types/node', true);

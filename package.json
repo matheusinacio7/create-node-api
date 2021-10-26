@@ -1,7 +1,7 @@
 {
   "name": "@heyset/create-node-api",
-  "version": "0.0.25",
-  "description": "Boilerplate for a Node backend app, with error handling middlewares and a loosely coupled layered architecture.",
+  "version": "0.0.26",
+  "description": "Boilerplate for a Node backend app, with error handling middleware and a loosely coupled, layered architecture.",
   "type": "module",
   "bin": {
     "create-node-api": "dist.cjs"

@@ -4,13 +4,17 @@
     "module": "commonjs",
     "noImplicitAny": true,
     "skipLibCheck": true,
+    "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
-    "rootDir": "src",
+    "rootDir": "./",
     "sourceMap": true,
     "baseUrl": "./",
     "paths": {
       "@errors": ["src/errors"],
       "@errors/*": ["src/errors/*"]
-    }
-  }
+    },
+  },
+  "exclude": [
+    "./node_modules"
+  ]
 }
