@@ -15,10 +15,9 @@ export default class Package {
     this.#object.main = 'index.ts';
     this.#object.version = '0.1.0';
     this.#object.license = 'MIT';
-    this.#object.type = 'module';
     this.#object.scripts = {
-      start: 'ts-node -r dotenv/config index.ts',
-      dev: 'ts-node-dev -r dotenv/config index.ts'
+      start: 'ts-node -r dotenv/config -r esm -r tsconfig-paths/register index.ts',
+      dev: 'ts-node-dev -r dotenv/config -r esm -r tsconfig-paths/register index.ts'
     };
     this.#object.dependencies = {};
     this.#object.devDependencies = {};  
@@ -55,6 +54,8 @@ export default class Package {
     await this.addDependency('ts-node-dev', true);
     await this.addDependency('typescript', true);
     await this.addDependency('@types/node', true);
+    await this.addDependency('esm');
+    await this.addDependency('tsconfig-paths', true);
   }
 
   install() {

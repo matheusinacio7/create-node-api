@@ -26,7 +26,7 @@ async function mainInterface(program: Command) {
   await fs.mkdir(path.resolve(globals.workingDirectory, 'src'));
 
   console.log('\nInitalizing package.json');
-  
+
   const packageJson = new PackageJson({ author: 'Set', name: appName });
   await packageJson.initializeCoreDependencies();
 
@@ -42,6 +42,7 @@ async function mainInterface(program: Command) {
   await packageJson.addDependency('@types/cors', true);
   await packageJson.addDependency('helmet');
   
+  await copyPackage('controllers');
   await copyPackage('errors');
   await copyPackage('middlewares');
 

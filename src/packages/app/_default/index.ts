@@ -3,7 +3,7 @@ import helmet from 'helmet';
 import cors from 'cors';
 
 import { catchInvalidEndpoint, handleError } from '@middlewares';
-import routers from '@routers';
+import * as routers from '@routers';
 
 const app = express();
 const PORT = process.env.PORT || 3030;
