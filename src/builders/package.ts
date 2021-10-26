@@ -36,7 +36,10 @@ export default class Package {
       let version : string;
   
       cp.stdout.on('data', (chunk) => {
-        version = chunk.toString().replace('\n', '');
+        const extractedVersion = chunk.toString().match(/\d+\.\d+\.\d+/);
+        if (extractedVersion) {
+          version = extractedVersion;
+        }
       });
 
       cp.on('close', () => resolve(version));
