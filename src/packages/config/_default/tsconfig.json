@@ -10,8 +10,18 @@
     "sourceMap": true,
     "baseUrl": "./",
     "paths": {
+      "@controllers": ["src/controllers"],
+      "@controllers/*": ["src/controllers/*"],
       "@errors": ["src/errors"],
-      "@errors/*": ["src/errors/*"]
+      "@errors/*": ["src/errors/*"],
+      "@middlewares": ["src/middlewares"],
+      "@middlewares/*": ["src/middlewares/*"],
+      "@models": ["src/models"],
+      "@models/*": ["src/models/*"],
+      "@routers": ["src/routers"],
+      "@routers/*": ["src/routers/*"],
+      "@validation": ["src/validation"],
+      "@validation/*": ["src/validation/*"],
     },
   },
   "exclude": [

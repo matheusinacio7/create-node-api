@@ -26,10 +26,12 @@ async function mainInterface(program: Command) {
   await fs.mkdir(path.resolve(globals.workingDirectory, 'src'));
 
   console.log('\nInitalizing package.json');
+  
   const packageJson = new PackageJson({ author: 'Set', name: appName });
   await packageJson.initializeCoreDependencies();
 
   console.log('\nCreating packages');
+
   await copyPackage('config', true);
   await fs.writeFile(path.resolve(globals.workingDirectory, '.env'), 'PORT=3030\n');
 
@@ -41,6 +43,16 @@ async function mainInterface(program: Command) {
   await packageJson.addDependency('helmet');
   
   await copyPackage('errors');
+  await copyPackage('middlewares');
+
+  await copyPackage('models');
+  await packageJson.addDependency('mongodb');
+
+  await copyPackage('routers');
+
+  await copyPackage('validation');
+  await packageJson.addDependency('ajv');
+  await packageJson.addDependency('ajv-errors');
 
   await packageJson.save();
 
