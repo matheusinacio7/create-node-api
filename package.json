@@ -10,7 +10,8 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "webpack --mode production",
-    "test:manual": "rm -rf manual_test/ && webpack --mode development && mkdir manual_test && cd manual_test && clear && node ../dist.cjs manual_test"
+    "test:manual": "rm -rf manual_test/ && webpack --mode development && mkdir manual_test && cd manual_test && clear && node ../dist.cjs manual_test",
+    "publish": "yarn build && yarn publish --access public"
   },
   "repository": {
     "type": "git",
