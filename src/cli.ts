@@ -1,5 +1,5 @@
 import * as path from 'path';
-import { promises as fs } from 'fs';
+import fs from 'fs-extra';
 
 import { Command } from 'commander';
 
@@ -31,6 +31,7 @@ async function mainInterface(program: Command) {
 
   console.log('\nCreating packages');
   await copyPackage('config', true);
+  await fs.writeFile(path.resolve(globals.workingDirectory, '.env'), 'PORT=3030\n');
 
   await copyPackage('app', true);
   await packageJson.addDependency('express');

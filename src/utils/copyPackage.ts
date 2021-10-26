@@ -15,10 +15,10 @@ export default async function copyPackage(packageName: string, onRoot = false) {
 
     return fs.copyFile(sourceFile, targetFile).then(() => {
       // ? rename after copying to prevent npm from changing .gitignore to .npmignore and ignoring .env
-      if (['_gitignore', '_env'].includes(fileName)) {
+      if (fileName === '.npmignore') {
         return fs.move(
           targetFile,
-          path.resolve(targetDirectory, fileName.replace('_', '.'))
+          path.resolve(targetDirectory, fileName.replace('npm', 'git'))
         );
       }
     });
