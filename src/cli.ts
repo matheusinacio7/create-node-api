@@ -2,6 +2,7 @@ import * as path from 'path';
 import fs from 'fs-extra';
 
 import { Command } from 'commander';
+import ora from 'ora';
 
 import * as git from '@builders/git';
 import PackageJson from '@builders/package';
@@ -13,7 +14,7 @@ import copyPackage from '@utils/copyPackage';
 
 
 async function mainInterface(program: Command) {
-  console.log('Initializing Git repository.');
+  const spinner = ora('Initializing Git repository.').start();
   await git.initialize();
 
   const appName = !program.args[0].startsWith('.')
@@ -25,12 +26,12 @@ async function mainInterface(program: Command) {
 
   await fs.mkdir(path.resolve(globals.workingDirectory, 'src'));
 
-  console.log('\nInitalizing package.json');
+  spinner.text = '\nInitalizing package.json';
 
   const packageJson = new PackageJson({ author: 'Set', name: appName });
   await packageJson.initializeCoreDependencies();
 
-  console.log('\nCreating packages');
+  spinner.text = '\nCreating packages';
 
   await copyPackage('config', true);
   await fs.writeFile(path.resolve(globals.workingDirectory, '.env'), 'PORT=3030\n');
@@ -57,12 +58,16 @@ async function mainInterface(program: Command) {
 
   await packageJson.save();
 
-  console.log('\nInstalling dependencies');
+  spinner.text = '\nInstalling dependencies';
   await packageJson.install();
 
-  console.log('\nDoing initial commit');
+  spinner.text = '\nDoing initial commit';
   await git.add('.');
   await git.commit(`Initial commit by create-node-api @${await globals.version}`);
+
+  spinner.stop();
+
+  console.log(`\nAll done! You can check out the project at ${appName}, and run with yarn dev.`);
 }
 
 export default async function entry() {
