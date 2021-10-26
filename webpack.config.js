@@ -14,7 +14,8 @@ export default {
         use: 'ts-loader',
         exclude: [
           /node_modules/,
-          /packages/
+          /packages/,
+          /manual_test/
         ],
       },
     ],

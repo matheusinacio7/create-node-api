@@ -20,5 +20,6 @@
     "./dist.js",
     "./webpack.config.js",
     "./src/packages/",
+    "./manual_test/"
   ]
 }
