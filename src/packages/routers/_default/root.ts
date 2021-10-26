@@ -1,6 +1,6 @@
 import { Router } from 'express';
 
-import Ping from '@controllers';
+import { Ping } from '@controllers';
 
 const router = Router();
 

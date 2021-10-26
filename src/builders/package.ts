@@ -16,8 +16,9 @@ export default class Package {
     this.#object.version = '0.1.0';
     this.#object.license = 'MIT';
     this.#object.scripts = {
-      start: 'ts-node -r dotenv/config -r esm -r tsconfig-paths/register index.ts',
-      dev: 'ts-node-dev -r dotenv/config -r esm -r tsconfig-paths/register index.ts'
+      "build": "tsc && cp ./tsconfig.json ./dist/",
+      "dev": "ts-node-dev -r dotenv/config -r tsconfig-paths/register index.ts",
+      "start": "npm run build && TS_NODE_PROJECT=dist/tsconfig.json node -r tsconfig-paths/register ./dist/index.js"
     };
     this.#object.dependencies = {};
     this.#object.devDependencies = {};  
@@ -54,7 +55,6 @@ export default class Package {
     await this.addDependency('ts-node-dev', true);
     await this.addDependency('typescript', true);
     await this.addDependency('@types/node', true);
-    await this.addDependency('esm');
     await this.addDependency('tsconfig-paths', true);
   }
 
