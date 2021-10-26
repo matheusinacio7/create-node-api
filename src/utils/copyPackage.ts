@@ -8,10 +8,16 @@ export default async function copyPackage(packageName: string, onRoot = false) {
   const targetDirectory = path.resolve(globals.workingDirectory, onRoot ? '' : 'src', onRoot ? '' : packageName);
   
   const fileList = await fs.readdir(sourceDirectory);
+
+  if (!fileList.length) return Promise.resolve();
   
   const copyPromises = fileList.map((fileName) => {
     const sourceFile = path.resolve(sourceDirectory, fileName);
     const targetFile = path.resolve(targetDirectory, fileName);
+    
+    if (fs.lstatSync(sourceFile).isDirectory()) {
+      return fs.mkdir(targetFile); // TODO recursively copy folder structure
+    }
 
     return fs.copyFile(sourceFile, targetFile).then(() => {
       // ? rename after copying to prevent npm from changing .gitignore to .npmignore and ignoring .env
