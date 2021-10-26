@@ -1,4 +1,4 @@
 node_modules
-dist.js
+dist.cjs
 dist
 manual_test
