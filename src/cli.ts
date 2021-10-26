@@ -4,20 +4,21 @@ import { promises as fs } from 'fs';
 import { Command } from 'commander';
 
 import * as git from '@builders/git';
-import * as packageJson from '@builders/package';
+import PackageJson from '@builders/package';
 
 import handleError from '@middlewares/handleError';
 
 import globals from '@utils/globals';
 import copyPackage from '@utils/copyPackage';
 
-import PackageJson from '@builders/package';
 
 async function mainInterface(program: Command) {
   console.log('Initializing Git repository.');
   await git.initialize();
 
-  const appName = program.args[0];
+  const appName = !program.args[0].startsWith('.')
+    ? program.args[0]
+    : path.basename(__dirname);
 
   const dirName = path.resolve(globals.scriptBaseDirectory, appName);
   globals.dirname = dirName;
@@ -43,7 +44,7 @@ async function mainInterface(program: Command) {
   await packageJson.save();
 
   console.log('\nInstalling dependencies');
-  // await packageJson.install();
+  await packageJson.install();
 
   console.log('\nDoing initial commit');
   await git.add('.');

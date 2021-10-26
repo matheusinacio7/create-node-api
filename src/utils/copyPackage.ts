@@ -10,7 +10,6 @@ export default async function copyPackage(packageName: string, onRoot = false) {
   const fileList = await fs.readdir(sourceDirectory);
   
   const copyPromises = fileList.map((fileName) => {
-    console.log(fileName);
     const sourceFile = path.resolve(sourceDirectory, fileName);
     const targetFile = path.resolve(targetDirectory, fileName);
 
