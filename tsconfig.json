@@ -5,6 +5,7 @@
     "module": "ES2020",
     "allowJs": true,
     "noImplicitAny": true,
+    "esModuleInterop": true,
     "moduleResolution": "Node",
     "rootDir": "src",
     "sourceMap": true,

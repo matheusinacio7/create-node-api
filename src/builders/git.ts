@@ -8,3 +8,7 @@ export const initialize = () => new Promise<void>((resolve, reject) => {
       reject(error);
     });
 });
+
+export const add = (folder: string) => spawnPromise('git', ['add', folder]);
+
+export const commit = (message: string) => spawnPromise('git', ['commit', '-m', message]);

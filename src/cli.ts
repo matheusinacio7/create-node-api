@@ -15,11 +15,7 @@ import PackageJson from '@builders/package';
 
 async function mainInterface(program: Command) {
   console.log('Initializing Git repository.');
-  await git.initialize()
-    .then(() => {
-      console.log('Git repository initialized successfully.');
-    })
-    .catch(handleError);
+  await git.initialize();
 
   const appName = program.args[0];
 
@@ -37,7 +33,9 @@ async function mainInterface(program: Command) {
 
   await copyPackage('app', true);
   await packageJson.addDependency('express');
+  await packageJson.addDependency('@types/express', true);
   await packageJson.addDependency('cors');
+  await packageJson.addDependency('@types/cors', true);
   await packageJson.addDependency('helmet');
   
   await copyPackage('errors');
@@ -46,14 +44,17 @@ async function mainInterface(program: Command) {
 
   console.log('\nInstalling dependencies');
   // await packageJson.install();
+
+  console.log('\nDoing initial commit');
+  await git.add('.');
+  await git.commit(`Initial commit by create-node-api @${await globals.version}`);
 }
 
 export default async function entry() {
   try {
-
     const program = new Command();
 
-    program.version('0.0.26');
+    program.version(await globals.version);
   
     program.argument('<folder>');
 
