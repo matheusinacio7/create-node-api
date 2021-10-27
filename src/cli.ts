@@ -23,6 +23,10 @@ async function mainInterface(program: Command) {
     await fs.mkdir(globals.workingDirectory);
   }
 
+
+  console.log(program.args[0]);
+  console.log(globals.workingDirectory);
+
   const appName = !installingOnCurrentFolder
     ? program.args[0]
     : path.basename(__dirname);
