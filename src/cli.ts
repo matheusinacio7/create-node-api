@@ -65,7 +65,7 @@ async function mainInterface(program: Command) {
   await packageJson.save();
 
   console.log('\nInstalling dependencies');
-  // await packageJson.install();
+  await packageJson.install();
 
   console.log('\nDoing initial commit');
   await git.add('.');
