@@ -4,7 +4,7 @@
   "description": "Boilerplate for a Node backend app, with error handling middleware and a loosely coupled, layered architecture.",
   "type": "module",
   "bin": {
-    "create-node-api": "dist.cjs"
+    "create-node-api": "dist.cjs" 
   },
   "main": "index.ts",
   "scripts": {

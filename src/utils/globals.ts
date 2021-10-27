@@ -4,6 +4,7 @@ import path from 'path';
 
 let scriptBaseDirectory : string;
 let currentVersion : string;
+let targetFolder : string;
 
 const globals = {
   get scriptBaseDirectory () {
@@ -14,7 +15,11 @@ const globals = {
   },
 
   get workingDirectory() {
-    return process.cwd();
+    return targetFolder ? path.resolve(process.cwd(), targetFolder) : process.cwd();
+  },
+
+  set targetFolder(target : string) {
+    targetFolder = target;
   },
 
   get version() {

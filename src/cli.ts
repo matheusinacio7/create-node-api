@@ -16,7 +16,14 @@ async function mainInterface(program: Command) {
   console.log('Initializing Git repository.');
   await git.initialize();
 
-  const appName = !program.args[0].startsWith('.')
+  const installingOnCurrentFolder = program.args[0] === '.';
+
+  if (!installingOnCurrentFolder) {
+    globals.targetFolder = program.args[0];
+    await fs.mkdir(globals.workingDirectory);
+  }
+
+  const appName = !installingOnCurrentFolder
     ? program.args[0]
     : path.basename(__dirname);
 
@@ -58,7 +65,7 @@ async function mainInterface(program: Command) {
   await packageJson.save();
 
   console.log('\nInstalling dependencies');
-  await packageJson.install();
+  // await packageJson.install();
 
   console.log('\nDoing initial commit');
   await git.add('.');
