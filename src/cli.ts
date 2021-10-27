@@ -11,18 +11,16 @@ import handleError from '@middlewares/handleError';
 import globals from '@utils/globals';
 import copyPackage from '@utils/copyPackage';
 
-
 async function mainInterface(program: Command) {
-  console.log('Initializing Git repository.');
-  await git.initialize();
-
   const installingOnCurrentFolder = program.args[0] === '.';
-
+  
   if (!installingOnCurrentFolder) {
     globals.targetFolder = program.args[0];
     await fs.mkdir(globals.workingDirectory);
   }
-
+  
+  console.log('Initializing Git repository.');
+  await git.initialize();
 
   console.log(program.args[0]);
   console.log(globals.workingDirectory);
