@@ -1,6 +1,6 @@
 {
   "name": "@heyset/create-node-api",
-  "version": "0.2.11",
+  "version": "0.3.0",
   "description": "Boilerplate for a Node backend app, with error handling middleware and a loosely coupled, layered architecture.",
   "type": "module",
   "bin": {
