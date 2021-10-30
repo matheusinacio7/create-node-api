@@ -32,7 +32,7 @@ export default class Package {
     let version : string;
     let parsedDepName : string;
 
-    if (!depName.includes('@')) {
+    if (!depName.includes('@@')) {
       const cp = new ChildProcess('yarn', ['info', depName, 'version']);
   
       cp.runningProcess.stdout.on('data', (chunk) => {
