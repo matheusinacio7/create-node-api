@@ -108,7 +108,7 @@ async function mainInterface(program: Command) {
   console.log('\nInstalling dependencies');
   await packageJson.install();
 
-  await new ChildProcess('yarn', ['dba', 'setup']).execution;
+  await new ChildProcess('yarn', ['dba_setup']).execution;
 
   console.log('\nDoing initial commit');
   await git.add('.');
