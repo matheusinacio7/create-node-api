@@ -58,6 +58,12 @@ export default class Package {
     await this.addDependency('tsconfig-paths', true);
   }
 
+  async changeScript(key: string, value: string) {
+    const newScript = { [key]: value };
+
+    this.#object.scripts = Object.assign(this.#object.scripts, newScript);
+  }
+
   install() {
     return new ChildProcess('yarn').execution;
   }

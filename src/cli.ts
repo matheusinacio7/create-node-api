@@ -39,7 +39,12 @@ async function mainInterface(program: Command) {
   console.log('\nCreating packages');
 
   await copyPackage('config', true);
-  await fs.writeFile(path.resolve(globals.workingDirectory, '.env'), 'PORT=3030\n');
+  let envFile = '';
+  envFile += 'PORT=3030\n';
+  envFile += 'NODE_ENV=development\n';
+  envFile += 'CONNECTION_STRING=mongodb://localhost:27017';
+  envFile += 'DB_NAME=cnaTestDb';
+  await fs.writeFile(path.resolve(globals.workingDirectory, '.env'), envFile);
 
   await copyPackage('app', true);
   await packageJson.addDependency('express');
@@ -54,12 +59,26 @@ async function mainInterface(program: Command) {
 
   await copyPackage('models');
   await packageJson.addDependency('mongodb');
+  await packageJson.changeScript('dba_setup', 'node src/models/dba/setup.js');
+  await packageJson.addDependency('bcrypt');
+  await packageJson.addDependency('@types/bcrypt', true);
 
   await copyPackage('routers');
 
-  await copyPackage('validation');
+  await copyPackage('services');
   await packageJson.addDependency('ajv');
   await packageJson.addDependency('ajv-errors');
+  await packageJson.addDependency('ajv-formats');
+  await packageJson.addDependency('jsonwebtoken');
+  await packageJson.changeScript('gen_ec_keys', 'openssl ecparam -genkey -name prime256v1 -noout -out ec_private.pem && openssl ec -in ec_private.pem -pubout -out ec_public.pem');
+  await packageJson.changeScript('dev', 'yarn gen_ec_keys && ts-node-dev -r dotenv/config -r tsconfig-paths/register index.ts');
+  await packageJson.changeScript('start', 'yarn gen_ec_keys && npm run build && TS_NODE_PROJECT=dist/tsconfig.json node -r tsconfig-paths/register ./dist/index.js');
+  await packageJson.addDependency('ms');
+  await packageJson.addDependency('@types/ms', true);
+  await packageJson.addDependency('nanoid');
+  await packageJson.addDependency('redis');
+
+  await copyPackage('utils');
 
   await packageJson.save();
 
