@@ -42,7 +42,7 @@ async function mainInterface(program: Command) {
   let envFile = '';
   envFile += 'PORT=3030\n';
   envFile += 'NODE_ENV=development\n';
-  envFile += 'CONNECTION_STRING=mongodb://localhost:27017';
+  envFile += 'CONNECTION_STRING=mongodb://localhost:27017\n';
   envFile += 'DB_NAME=cnaTestDb';
   await fs.writeFile(path.resolve(globals.workingDirectory, '.env'), envFile);
 
@@ -70,13 +70,14 @@ async function mainInterface(program: Command) {
   await packageJson.addDependency('ajv-errors');
   await packageJson.addDependency('ajv-formats');
   await packageJson.addDependency('jsonwebtoken');
+  await packageJson.addDependency('@types/jsonwebtoken', true);
   await packageJson.changeScript('gen_ec_keys', 'openssl ecparam -genkey -name prime256v1 -noout -out ec_private.pem && openssl ec -in ec_private.pem -pubout -out ec_public.pem');
   await packageJson.changeScript('dev', 'yarn gen_ec_keys && ts-node-dev -r dotenv/config -r tsconfig-paths/register index.ts');
   await packageJson.changeScript('start', 'yarn gen_ec_keys && npm run build && TS_NODE_PROJECT=dist/tsconfig.json node -r tsconfig-paths/register ./dist/index.js');
   await packageJson.addDependency('ms');
   await packageJson.addDependency('@types/ms', true);
   await packageJson.addDependency('nanoid');
-  await packageJson.addDependency('redis');
+  await packageJson.addDependency('redis@next');
 
   await copyPackage('utils');
 
