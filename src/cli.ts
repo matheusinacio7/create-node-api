@@ -105,7 +105,7 @@ async function mainInterface(program: Command) {
 
   await packageJson.save();
 
-  console.log('\nInstalling dependencies');
+  console.log('\nInstalling dependencies. This could take some time.');
   await packageJson.install();
 
   console.log('\nSetting up DB.');
