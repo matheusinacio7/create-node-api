@@ -10,6 +10,7 @@ import handleError from '@middlewares/handleError';
 
 import globals from '@utils/globals';
 import copyPackage from '@utils/copyPackage';
+import ChildProcess from '@utils/ChildProcess';
 
 async function mainInterface(program: Command) {
   const installingOnCurrentFolder = program.args[0] === '.';
@@ -106,6 +107,8 @@ async function mainInterface(program: Command) {
 
   console.log('\nInstalling dependencies');
   await packageJson.install();
+
+  await new ChildProcess('yarn', ['dba', 'setup']).execution;
 
   console.log('\nDoing initial commit');
   await git.add('.');
