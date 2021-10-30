@@ -46,40 +46,61 @@ async function mainInterface(program: Command) {
   envFile += 'DB_NAME=cnaTestDb';
   await fs.writeFile(path.resolve(globals.workingDirectory, '.env'), envFile);
 
-  await copyPackage('app', true);
-  await packageJson.addDependency('express');
-  await packageJson.addDependency('@types/express', true);
-  await packageJson.addDependency('cors');
-  await packageJson.addDependency('@types/cors', true);
-  await packageJson.addDependency('helmet');
+  const createApp = Promise.all(
+    [
+      copyPackage('app', true),
+      packageJson.addDependency('express'),
+      packageJson.addDependency('@types/express', true),
+      packageJson.addDependency('cors'),
+      packageJson.addDependency('@types/cors', true),
+      packageJson.addDependency('helmet'),
+    ]
+  );
+
+  const createControllers = copyPackage('controllers');
+
+  const createErrors = copyPackage('errors');
+
+  const createMiddlewares = copyPackage('middlewares');
   
-  await copyPackage('controllers');
-  await copyPackage('errors');
-  await copyPackage('middlewares');
+  const createModels = Promise.all([
+    copyPackage('models'),
+    packageJson.addDependency('mongodb'),
+    packageJson.changeScript('dba_setup', 'node src/models/dba/setup.js'),
+    packageJson.addDependency('bcrypt'),
+    packageJson.addDependency('@types/bcrypt', true),
+  ]);
 
-  await copyPackage('models');
-  await packageJson.addDependency('mongodb');
-  await packageJson.changeScript('dba_setup', 'node src/models/dba/setup.js');
-  await packageJson.addDependency('bcrypt');
-  await packageJson.addDependency('@types/bcrypt', true);
+  const createRouters = copyPackage('routers');
 
-  await copyPackage('routers');
+  const createServices = Promise.all([
+    copyPackage('services'),
+    packageJson.addDependency('ajv'),
+    packageJson.addDependency('ajv-errors'),
+    packageJson.addDependency('ajv-formats'),
+    packageJson.addDependency('jsonwebtoken'),
+    packageJson.addDependency('@types/jsonwebtoken', true),
+    packageJson.changeScript('gen_ec_keys', 'openssl ecparam -genkey -name prime256v1 -noout -out ec_private.pem && openssl ec -in ec_private.pem -pubout -out ec_public.pem'),
+    packageJson.changeScript('dev', 'yarn gen_ec_keys && ts-node-dev -r dotenv/config -r tsconfig-paths/register index.ts'),
+    packageJson.changeScript('start', 'yarn gen_ec_keys && npm run build && TS_NODE_PROJECT=dist/tsconfig.json node -r tsconfig-paths/register ./dist/index.js'),
+    packageJson.addDependency('ms'),
+    packageJson.addDependency('@types/ms', true),
+    packageJson.addDependency('nanoid'),
+    packageJson.addDependency('redis@@4.0.0-rc.3'),
+  ]);
 
-  await copyPackage('services');
-  await packageJson.addDependency('ajv');
-  await packageJson.addDependency('ajv-errors');
-  await packageJson.addDependency('ajv-formats');
-  await packageJson.addDependency('jsonwebtoken');
-  await packageJson.addDependency('@types/jsonwebtoken', true);
-  await packageJson.changeScript('gen_ec_keys', 'openssl ecparam -genkey -name prime256v1 -noout -out ec_private.pem && openssl ec -in ec_private.pem -pubout -out ec_public.pem');
-  await packageJson.changeScript('dev', 'yarn gen_ec_keys && ts-node-dev -r dotenv/config -r tsconfig-paths/register index.ts');
-  await packageJson.changeScript('start', 'yarn gen_ec_keys && npm run build && TS_NODE_PROJECT=dist/tsconfig.json node -r tsconfig-paths/register ./dist/index.js');
-  await packageJson.addDependency('ms');
-  await packageJson.addDependency('@types/ms', true);
-  await packageJson.addDependency('nanoid');
-  await packageJson.addDependency('redis@@4.0.0-rc.3');
+  const createUtils = copyPackage('utils');
 
-  await copyPackage('utils');
+  await Promise.all([
+    createApp,
+    createControllers,
+    createErrors,
+    createMiddlewares,
+    createModels,
+    createRouters,
+    createServices,
+    createUtils
+  ]);
 
   await packageJson.save();
 
