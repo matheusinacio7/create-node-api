@@ -108,11 +108,14 @@ async function mainInterface(program: Command) {
   console.log('\nInstalling dependencies');
   await packageJson.install();
 
+  console.log('\nSetting up DB.');
   await new ChildProcess('yarn', ['dba_setup']).execution;
 
   console.log('\nDoing initial commit');
   await git.add('.');
   await git.commit(`Initial commit by create-node-api @${await globals.version}`);
+
+  console.log('\nAll done! You can now start your project by running yarn dev!');
 }
 
 export default async function entry() {
