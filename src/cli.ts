@@ -10,6 +10,7 @@ import handleError from '@middlewares/handleError';
 
 import globals from '@utils/globals';
 import copyPackage from '@utils/copyPackage';
+import ChildProcess from '@utils/ChildProcess';
 
 async function mainInterface(program: Command) {
   const installingOnCurrentFolder = program.args[0] === '.';
@@ -104,12 +105,17 @@ async function mainInterface(program: Command) {
 
   await packageJson.save();
 
-  console.log('\nInstalling dependencies');
+  console.log('\nInstalling dependencies. This could take some time.');
   await packageJson.install();
+
+  console.log('\nSetting up DB.');
+  await new ChildProcess('yarn', ['dba_setup']).execution;
 
   console.log('\nDoing initial commit');
   await git.add('.');
   await git.commit(`Initial commit by create-node-api @${await globals.version}`);
+
+  console.log('\nAll done! You can now start your project by running yarn dev!');
 }
 
 export default async function entry() {
