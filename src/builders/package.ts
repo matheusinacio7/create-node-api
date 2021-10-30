@@ -29,23 +29,29 @@ export default class Package {
   }
 
   async addDependency(depName: string, dev = false) {
-    const cp = new ChildProcess('yarn', ['info', depName, 'version']);
-
     let version : string;
+    let parsedDepName : string;
 
-    cp.runningProcess.stdout.on('data', (chunk) => {
-      const extractedVersion = chunk.toString().match(/\d+\.\d+\.\d+/);
-      if (extractedVersion) {
-        version = extractedVersion;
-      }
-    });
-
-    await cp.execution;
+    if (!depName.includes('@')) {
+      const cp = new ChildProcess('yarn', ['info', depName, 'version']);
+  
+      cp.runningProcess.stdout.on('data', (chunk) => {
+        const extractedVersion = chunk.toString().match(/\d+\.\d+\.\d+/);
+        if (extractedVersion) {
+          version = extractedVersion;
+          parsedDepName = depName;
+        }
+      });
+  
+      await cp.execution;
+    } else {
+      ([parsedDepName, version] = depName.split('@'));
+    }
 
     if (dev) {
-      this.#object.devDependencies[depName] = '^' + version;
+      this.#object.devDependencies[parsedDepName] = '^' + version;
     } else {
-      this.#object.dependencies[depName] = '^' + version;
+      this.#object.dependencies[parsedDepName] = '^' + version;
     }  
   }
 

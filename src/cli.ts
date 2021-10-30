@@ -77,7 +77,7 @@ async function mainInterface(program: Command) {
   await packageJson.addDependency('ms');
   await packageJson.addDependency('@types/ms', true);
   await packageJson.addDependency('nanoid');
-  await packageJson.addDependency('redis@next');
+  await packageJson.addDependency('redis@4.0.0-rc.3');
 
   await copyPackage('utils');
 
