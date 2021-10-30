@@ -59,12 +59,10 @@ const sign = (data: Object, type: TokenType, id: string, expiresIn?: string) => 
   return jwt.sign(data, ec_keys.private, getSignConfig(type, id, expiresIn));
 };
 class Blacklist {
-  #tree: Record<string, { r: number, a: number, invalid: boolean }>;
   #client;
 
   constructor() {
-    this.#tree = {};
-    this.#client = createClient({ })
+    this.#client = createClient();
   }
 
   async connect() {
@@ -72,11 +70,11 @@ class Blacklist {
   }
 
   async add(branch: string, type: 'a' | 'r', counter: number) {
-
     if (!await this.#client.EXISTS(branch)) {
       await this.#client.HSET(branch, 'r', '-1');
       await this.#client.HSET(branch, 'a', '-1');
       await this.#client.HSET(branch, 'i', '0');
+      await this.#client.EXPIRE(branch, ms(SETTINGS.refresh_token_absolute_lifetime) / 1000);
     }
 
     await this.#client.HSET(branch, type, counter.toString());

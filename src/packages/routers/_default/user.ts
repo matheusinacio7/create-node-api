@@ -3,7 +3,7 @@ import type { Response } from 'express';
 import ms from 'ms';
 
 import { User } from '@controllers';
-import { validateToken } from '@middlewares';
+import { validateToken, withCache } from '@middlewares';
 
 import { SETTINGS } from '@token';
 
@@ -61,7 +61,7 @@ router.post('/signup', (req, res, next) => {
     .catch(next);
 });
 
-router.get('/me', validateToken, (_req, res, next) => {
+router.get('/me', validateToken, withCache, (_req, res, next) => {
   User.getByUsername(res.locals.username).then((info) => {
     res.status(200).json(info);
   })
