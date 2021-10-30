@@ -45,7 +45,7 @@ export default class Package {
   
       await cp.execution;
     } else {
-      ([parsedDepName, version] = depName.split('@'));
+      ([parsedDepName, version] = depName.split('@@'));
     }
 
     if (dev) {
