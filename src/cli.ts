@@ -90,10 +90,30 @@ async function mainInterface(program: Command) {
     packageJson.addDependency('redis@@4.0.0-rc.3'),
   ]);
 
+  const createTests = Promise.all(
+    [
+      copyPackage('tests', true),
+      packageJson.changeScript('test', 'yarn gen_ec_keys && jest'),
+      packageJson.changeScript('test:coverage', 'yarn gen_ec_keys && jest --coverage --verbose=false'),
+      packageJson.addDependency('jest', true),
+      packageJson.addDependency('@types/jest', true),
+      packageJson.addDependency('ts-jest', true),
+      packageJson.addDependency('@sinonjs/fake-timers', true),
+      packageJson.addDependency('@types/sinonjs__fake-timers', true),
+      packageJson.addDependency('supertest', true),
+      packageJson.addDependency('@types/supertest', true),
+      packageJson.addDependency('mongodb-memory-server', true),
+      packageJson.addDependency('@babel/core', true),
+      packageJson.addDependency('@babel/preset-env', true),
+      packageJson.addDependency('@babel/preset-typescript', true),
+    ]
+  );
+
   const createUtils = copyPackage('utils');
 
   await Promise.all([
     createApp,
+    createTests,
     createControllers,
     createErrors,
     createMiddlewares,
