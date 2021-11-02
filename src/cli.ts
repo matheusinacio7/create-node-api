@@ -58,25 +58,6 @@ async function mainInterface(program: Command) {
     ]
   );
 
-  const createTests = Promise.all(
-    [
-      copyPackage('__tests__'),
-      packageJson.changeScript('test', 'jest'),
-      packageJson.changeScript('test:cover', 'jest --coverage --verbose=false'),
-      packageJson.addDependency('jest', true),
-      packageJson.addDependency('@types/jest', true),
-      packageJson.addDependency('ts-jest', true),
-      packageJson.addDependency('@sinonjs/fake-timers', true),
-      packageJson.addDependency('@types/sinonjs__fake-timers', true),
-      packageJson.addDependency('supertest', true),
-      packageJson.addDependency('@types/supertest', true),
-      packageJson.addDependency('mongodb-memory-server', true),
-      packageJson.addDependency('@babel/core', true),
-      packageJson.addDependency('@babel/preset-env', true),
-      packageJson.addDependency('@babel/preset-typescript', true),
-    ]
-  );
-
   const createControllers = copyPackage('controllers');
 
   const createErrors = copyPackage('errors');
@@ -108,6 +89,25 @@ async function mainInterface(program: Command) {
     packageJson.addDependency('nanoid'),
     packageJson.addDependency('redis@@4.0.0-rc.3'),
   ]);
+
+  const createTests = Promise.all(
+    [
+      copyPackage('tests', true),
+      packageJson.changeScript('test', 'jest'),
+      packageJson.changeScript('test:cover', 'jest --coverage --verbose=false'),
+      packageJson.addDependency('jest', true),
+      packageJson.addDependency('@types/jest', true),
+      packageJson.addDependency('ts-jest', true),
+      packageJson.addDependency('@sinonjs/fake-timers', true),
+      packageJson.addDependency('@types/sinonjs__fake-timers', true),
+      packageJson.addDependency('supertest', true),
+      packageJson.addDependency('@types/supertest', true),
+      packageJson.addDependency('mongodb-memory-server', true),
+      packageJson.addDependency('@babel/core', true),
+      packageJson.addDependency('@babel/preset-env', true),
+      packageJson.addDependency('@babel/preset-typescript', true),
+    ]
+  );
 
   const createUtils = copyPackage('utils');
 
