@@ -93,8 +93,8 @@ async function mainInterface(program: Command) {
   const createTests = Promise.all(
     [
       copyPackage('tests', true),
-      packageJson.changeScript('test', 'jest'),
-      packageJson.changeScript('test:cover', 'jest --coverage --verbose=false'),
+      packageJson.changeScript('test', 'yarn gen_ec_keys && jest'),
+      packageJson.changeScript('test:coverage', 'yarn gen_ec_keys && jest --coverage --verbose=false'),
       packageJson.addDependency('jest', true),
       packageJson.addDependency('@types/jest', true),
       packageJson.addDependency('ts-jest', true),
