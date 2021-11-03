@@ -8,14 +8,15 @@ let connection : MongoClient;
 
 const connect = () => (db
   ? Promise.resolve(db)
-  : new Promise(async (resolve) => {
-      const server = await MongoMemoryServer.create();
-      const URL = server.getUri();
-      connection = await MongoClient.connect(URL);
+  : MongoMemoryServer.create()
+    .then((server) => server.getUri())
+    .then((URL) => MongoClient.connect(URL))
+    .then((newConnection) => {
+      connection = newConnection;
       db = connection.db('mock_db');
-      resolve(db);
+      return db;
     })
-  );
+);
 
 export const disconnect = () => connection.close();
 

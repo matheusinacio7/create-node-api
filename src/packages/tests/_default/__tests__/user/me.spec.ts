@@ -1,13 +1,17 @@
+/* global jest */
+/* global afterAll */
+/* global afterEach */
+/* global beforeEach */
+
 import { describe, expect, it } from '@jest/globals';
 import request from 'supertest';
 
 import app from '../../app';
-
-jest.mock('../../src/models/connect');
 import connect from '../../src/models/connect';
-
 import { closeCacheServer } from '../../src/middlewares/withCache';
 import { closeBlacklistServer } from '../../src/services/token';
+
+jest.mock('../../src/models/connect');
 
 afterAll(async () => {
   await closeCacheServer();
@@ -32,16 +36,16 @@ describe('GET /users/me', () => {
       .send(validData)
       .expect(201)
       .then((response) => {
-        const cookies = (response.headers['set-cookie'] as Array<string>).reduce((acc : Record<string,string>, cookie : string) => {
+        const cookies = (response.headers['set-cookie'] as Array<string>).reduce((acc : Record<string, string>, cookie : string) => {
           const [type, fullDescription] = cookie.split('=');
           const [value, ..._rest] = fullDescription.split(';');
           acc[type] = value;
           return acc;
         }, {});
-        
+
         accessToken = cookies.access_token;
         refreshToken = cookies.refresh_token;
-      })
+      });
   });
 
   afterEach(async () => {
@@ -50,15 +54,13 @@ describe('GET /users/me', () => {
   });
 
   describe('throws error with invalid data', () => {
-    it('invalid token', () => {
-      return request(app)
-        .get(url)
-        .set('Authorization', refreshToken)
-        .expect(401)
-        .expect((res) => {
-          expect(res.body.error.code).toBe('authorization_error');
-        });
-    });
+    it('invalid token', () => request(app)
+      .get(url)
+      .set('Authorization', refreshToken)
+      .expect(401)
+      .expect((res) => {
+        expect(res.body.error.code).toBe('authorization_error');
+      }));
 
     it('non-existing user', async () => {
       await connect()
@@ -75,18 +77,21 @@ describe('GET /users/me', () => {
   });
 
   describe('with correct data', () => {
-    it('returns the user info', () => {
-      return request(app)
-        .get(url)
-        .set('Authorization', accessToken)
-        .expect(200)
-        .expect((res) => {
-          const { username, email, admin, password } = res.body;
-          expect(username).toBe(validData.username);
-          expect(email).toBe(validData.email);
-          expect(admin).toBe(false);
-          expect(password).toBe(undefined);
-        });
-    });
+    it('returns the user info', () => request(app)
+      .get(url)
+      .set('Authorization', accessToken)
+      .expect(200)
+      .expect((res) => {
+        const {
+          username,
+          email,
+          admin,
+          password,
+        } = res.body;
+        expect(username).toBe(validData.username);
+        expect(email).toBe(validData.email);
+        expect(admin).toBe(false);
+        expect(password).toBe(undefined);
+      }));
   });
 });

@@ -17,7 +17,7 @@ const schemas = {
 };
 
 type CompiledSchemas = {
-  [Property in keyof typeof schemas] : any | null;
+  [_Property in keyof typeof schemas] : any | null;
 };
 
 const compiledSchemas : Partial<CompiledSchemas> = {};
@@ -32,7 +32,7 @@ export default function validate(schema: keyof typeof schemas, data: any) {
   }
 
   const valid = compiledSchemas[schema](data);
-  
+
   if (!valid) {
     const error = compiledSchemas[schema].errors[0];
     const message = `"${error.instancePath.replace('/', '')}" ${error.message}`;

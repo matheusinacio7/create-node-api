@@ -1,15 +1,13 @@
 import type { Db, MongoServerError } from 'mongodb';
 
-import connect from './connect';
 import { ConflictError, NotFoundError } from '@errors';
+import connect from './connect';
 
 const getCollection = (db : Db) => db.collection('users');
 
 const insertOne = (userData: any) => connect()
   .then(getCollection)
-  .then((collection) => {
-    return collection.insertOne(userData);
-  })
+  .then((collection) => collection.insertOne(userData))
   .catch((err : MongoServerError) => {
     if (err.message.includes('duplicate key')) {
       throw new ConflictError('User already exists');

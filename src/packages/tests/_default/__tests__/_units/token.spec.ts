@@ -1,3 +1,5 @@
+/* global afterAll */
+
 import { describe, expect, it } from '@jest/globals';
 import fs from 'fs';
 import * as jwt from 'jsonwebtoken';
@@ -16,7 +18,7 @@ const isEqualWithErrorMargin = (a : number, b : number, error : number) => {
 let privateKey : string;
 let publicKey : string;
 
-const ec_keys = {
+const ecKeys = {
   get private() {
     if (privateKey) return privateKey;
 
@@ -29,9 +31,11 @@ const ec_keys = {
 
     publicKey = fs.readFileSync('ec_public.pem', 'utf-8');
     return publicKey;
-  }
+  },
 };
 
+// ? Essa função pode ser util caso precisemos do par de chaves.
+/* eslint-disable-next-line */
 const genTempKeys = async () => {
   const genPrivateKey = cp.spawn('openssl', ['ecparam', '-genkey', '-name', 'prime256v1', '-noout', '-out', 'temp/ec_private.pem']);
 
@@ -39,18 +43,18 @@ const genTempKeys = async () => {
     genPrivateKey.on('close', () => resolve());
   });
 
-  const genPublicKey = cp.spawn('openssl', ['ec', '-in', 'temp/ec_private.pem', '-pubout', '-out', 'temp/ec_public.pem' ]);
+  const genPublicKey = cp.spawn('openssl', ['ec', '-in', 'temp/ec_private.pem', '-pubout', '-out', 'temp/ec_public.pem']);
 
   await new Promise<void>((resolve) => {
     genPublicKey.on('close', () => resolve());
   });
 
-  const [privateKey, publicKey] = await Promise.all([
+  const [generatedPrivateKey, generatedPublicKey] = await Promise.all([
     fs.promises.readFile('temp/ec_private.pem', 'utf-8'),
-    fs.promises.readFile('temp/ec_public.pem', 'utf-8')
+    fs.promises.readFile('temp/ec_public.pem', 'utf-8'),
   ]);
 
-  return { private: privateKey, public: publicKey };
+  return { private: generatedPrivateKey, public: generatedPublicKey };
 };
 
 afterAll(() => {
@@ -61,13 +65,13 @@ describe('Unit: token', () => {
   describe('getTokenPair returns a pair of access/refresh token with', () => {
     const dataPayload = { context: 'testing_unit' };
 
-    it ('the right types', () => {
+    it('the right types', () => {
       const { accessToken, refreshToken } = token.getTokenPair(dataPayload);
       expect((jwt.decode(accessToken) as jwt.JwtPayload).type).toBe('access');
       expect((jwt.decode(refreshToken) as jwt.JwtPayload).type).toBe('refresh');
     });
 
-    it ('the correct data', () => {
+    it('the correct data', () => {
       const { accessToken, refreshToken } = token.getTokenPair(dataPayload);
       expect((jwt.decode(accessToken) as jwt.JwtPayload).context).toBe('testing_unit');
       expect((jwt.decode(refreshToken) as jwt.JwtPayload).context).toBe('testing_unit');
@@ -90,8 +94,8 @@ describe('Unit: token', () => {
     it('a valid signature', () => {
       const { accessToken, refreshToken } = token.getTokenPair(dataPayload);
       expect(() => {
-        jwt.verify(accessToken, ec_keys.public);
-        jwt.verify(refreshToken, ec_keys.public);
+        jwt.verify(accessToken, ecKeys.public);
+        jwt.verify(refreshToken, ecKeys.public);
       }).not.toThrow();
     });
   });
@@ -101,17 +105,17 @@ describe('Unit: token', () => {
 
     it('rejects if the token was generated with a different secret', async () => {
       const genPrivateKey = cp.spawn('openssl', ['ecparam', '-genkey', '-name', 'prime256v1', '-noout']);
-      let privateKey = '';
+      let scopedPrivateKey = '';
 
       genPrivateKey.stdout.on('data', (chunk: Buffer) => {
-        privateKey = chunk.toString();
+        scopedPrivateKey = chunk.toString();
       });
 
       await new Promise<void>((resolve) => {
         genPrivateKey.on('close', () => resolve());
       });
 
-      const invalidToken = jwt.sign({ ...dataPayload, type: 'access' }, privateKey, { algorithm: 'ES256', expiresIn: '3d' });
+      const invalidToken = jwt.sign({ ...dataPayload, type: 'access' }, scopedPrivateKey, { algorithm: 'ES256', expiresIn: '3d' });
 
       await token.verifyAccessToken(invalidToken)
         .catch((err) => {
@@ -164,17 +168,17 @@ describe('Unit: token', () => {
 
     it('rejects if the token is invalid', async () => {
       const genPrivateKey = cp.spawn('openssl', ['ecparam', '-genkey', '-name', 'prime256v1', '-noout']);
-      let privateKey = '';
+      let scopedPrivateKey = '';
 
       genPrivateKey.stdout.on('data', (chunk: Buffer) => {
-        privateKey = chunk.toString();
+        scopedPrivateKey = chunk.toString();
       });
 
       await new Promise<void>((resolve) => {
         genPrivateKey.on('close', () => resolve());
       });
 
-      const invalidToken = jwt.sign({ ...dataPayload, type: 'refresh' }, privateKey, { algorithm: 'ES256', expiresIn: '3d' });
+      const invalidToken = jwt.sign({ ...dataPayload, type: 'refresh' }, scopedPrivateKey, { algorithm: 'ES256', expiresIn: '3d' });
 
       await expect(token.refreshTokenPair(invalidToken)).rejects.toEqual(new Error('Invalid token.'));
     });
@@ -202,10 +206,13 @@ describe('Unit: token', () => {
       const now = new Date();
       const then = new Date(now.getTime() + ms(token.SETTINGS.access_token_lifetime));
       clock.setSystemTime(then);
-      
+
       await expect(token.verifyAccessToken(accessToken)).rejects.toBeDefined();
 
-      const { accessToken: newAccessToken,  refreshToken: newRefreshToken } = await token.refreshTokenPair(refreshToken);
+      const {
+        accessToken: newAccessToken,
+        refreshToken: newRefreshToken,
+      } = await token.refreshTokenPair(refreshToken);
 
       await expect(token.verifyAccessToken(newAccessToken)).resolves.toBeDefined();
       await expect(token.refreshTokenPair(newRefreshToken)).resolves.toBeDefined();
@@ -228,7 +235,7 @@ describe('Unit: token', () => {
       let cycles = Math.ceil(lifetimes.absolute / cyclePeriod);
       let areCyclesExact = lifetimes.absolute % cycles === 0;
 
-      while(areCyclesExact) {
+      while (areCyclesExact) {
         cyclePeriod = Math.round(cyclePeriod * 0.95);
         cycles = Math.ceil(lifetimes.absolute / cyclePeriod);
         areCyclesExact = lifetimes.absolute % cycles === 0;
@@ -238,6 +245,8 @@ describe('Unit: token', () => {
 
       for (let i = 0; i < cycles - 2; i++) {
         clock.setSystemTime(new Date().valueOf() + cyclePeriod);
+        // ? The await in the next line is intentional, as it needs to await revalidation.
+        /* eslint-disable-next-line */
         const { refreshToken: newRefreshToken } = await token.refreshTokenPair(refreshToken);
         // console.log({ ...jwt.decode(newRefreshToken) as jwt.JwtPayload, treeAbsoluteExp });
         refreshToken = newRefreshToken;
@@ -262,7 +271,10 @@ describe('Unit: token', () => {
 
       await expect(token.verifyAccessToken(accessToken)).resolves.toBeDefined();
 
-      const { accessToken: newAccessToken, refreshToken: newRefreshToken } = await token.refreshTokenPair(refreshToken);
+      const {
+        accessToken: newAccessToken,
+        refreshToken: newRefreshToken,
+      } = await token.refreshTokenPair(refreshToken);
 
       await expect(token.verifyAccessToken(newAccessToken)).resolves.toBeDefined();
 

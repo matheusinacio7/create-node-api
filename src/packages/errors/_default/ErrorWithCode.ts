@@ -6,4 +6,3 @@ export default class ErrorWithCode extends Error {
     this.code = code;
   }
 }
-

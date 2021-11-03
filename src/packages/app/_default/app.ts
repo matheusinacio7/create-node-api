@@ -23,4 +23,3 @@ app.use(catchInvalidEndpoint);
 app.use(handleError);
 
 export default app;
-

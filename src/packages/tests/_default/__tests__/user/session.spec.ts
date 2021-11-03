@@ -1,3 +1,4 @@
+/* global jest, beforeEach, afterAll, afterEach */
 
 import { describe, expect, it } from '@jest/globals';
 import request from 'supertest';
@@ -8,19 +9,17 @@ import cp from 'child_process';
 import * as jwt from 'jsonwebtoken';
 
 import app from '../../app';
+import connect, { disconnect } from '../../src/models/connect';
+import { hash } from '../../src/services/crypto';
+import { closeCacheServer } from '../../src/middlewares/withCache';
+import { closeBlacklistServer, SETTINGS } from '../../src/services/token';
 
 jest.mock('../../src/models/connect');
-import connect, { disconnect } from '../../src/models/connect';
-
-import { closeCacheServer } from '../../src/middlewares/withCache';
-import { closeBlacklistServer } from '../../src/services/token';
-
-import { SETTINGS } from '../../src/services/token';
 
 const isEqualWithErrorMargin = (a : number, b : number, error : number) => {
   const absoluteDifference = Math.abs(a - b);
   return absoluteDifference < error;
-}
+};
 
 afterAll(async () => {
   await closeCacheServer();
@@ -37,25 +36,15 @@ describe('POST /users/session (login)', () => {
     password: '123janete456corca',
   };
 
-  let accessToken : string;
-  let refreshToken : string;
-
   beforeEach(async () => {
-    await request(app)
-      .post('/users')
-      .send(validData)
-      .expect(201)
-      .then((response) => {
-        const cookies = (response.headers['set-cookie'] as Array<string>).reduce((acc : Record<string,string>, cookie : string) => {
-          const [type, fullDescription] = cookie.split('=');
-          const [value, ...rest] = fullDescription.split(';');
-          acc[type] = value;
-          return acc;
-        }, {});
-        
-        accessToken = cookies.access_token;
-        refreshToken = cookies.refresh_token;
-      })
+    const hashedPassword = await hash(validData.password);
+
+    await connect()
+      .then((db) => db.collection('users').insertOne({
+        ...validData,
+        admin: false,
+        password: hashedPassword,
+      }));
   });
 
   afterEach(async () => {
@@ -64,66 +53,58 @@ describe('POST /users/session (login)', () => {
   });
 
   describe('throws error with invalid data', () => {
-    it('invalid username', () => {
-      return request(app)
-        .post(url)
-        .send({ username: 'kkk', password: validData.password })
-        .expect(404)
-        .expect((res) => {
-          expect(res.body.error.code).toBe('not_found');
-        });
-    });
+    it('invalid username', () => request(app)
+      .post(url)
+      .send({ username: 'kkk', password: validData.password })
+      .expect(404)
+      .expect((res) => {
+        expect(res.body.error.code).toBe('not_found');
+      }));
 
-    it('invalid email', () => {
-      return request(app)
-        .post(url)
-        .send({ email: 'vamo@nessa.com', password: validData.password })
-        .expect(404)
-        .expect((res) => {
-          expect(res.body.error.code).toBe('not_found');
-        });
-    });
+    it('invalid email', () => request(app)
+      .post(url)
+      .send({ email: 'vamo@nessa.com', password: validData.password })
+      .expect(404)
+      .expect((res) => {
+        expect(res.body.error.code).toBe('not_found');
+      }));
 
-    it('invalid password', () => {
-      return request(app)
-        .post(url)
-        .send({ email: validData.email, password: '123janetinha' })
-        .expect(403)
-        .expect((res) => {
-          expect(res.body.error.code).toBe('forbidden');
-        });
-    });
+    it('invalid password', () => request(app)
+      .post(url)
+      .send({ email: validData.email, password: '123janetinha' })
+      .expect(403)
+      .expect((res) => {
+        expect(res.body.error.code).toBe('forbidden');
+      }));
   });
 
   describe('with valid data', () => {
-    it('gets valid tokens with correct expiration', () => {
-      return request(app)
-        .post(url)
-        .send({ username: validData.username, password: validData.password })
-        .expect(200)
-        .then((res) => {
-          const cookies = (res.headers['set-cookie'] as Array<string>).reduce((acc : Record<string,string>, cookie : string) => {
-            const [type, fullDescription] = cookie.split('=');
-            const [value, ...rest] = fullDescription.split(';');
-            acc[type] = value;
-            return acc;
-          }, {});
+    it('gets valid tokens with correct expiration', () => request(app)
+      .post(url)
+      .send({ username: validData.username, password: validData.password })
+      .expect(200)
+      .then((res) => {
+        const cookies = (res.headers['set-cookie'] as Array<string>).reduce((acc : Record<string, string>, cookie : string) => {
+          const [type, fullDescription] = cookie.split('=');
+          const [value, ..._rest] = fullDescription.split(';');
+          acc[type] = value;
+          return acc;
+        }, {});
 
-          const refresh = decode(cookies.refresh_token) as JwtPayload;
-          expect(refresh.type).toBe('refresh');
-          const refreshExp = Math.round(ms(SETTINGS.refresh_token_inactivity_lifetime) / 1000);
-          const actualRefreshExp = (refresh.exp as number) - (refresh.iat as number);
-          expect(isEqualWithErrorMargin(refreshExp, actualRefreshExp, 60)).toBe(true);
-          
-          const access = decode(cookies.access_token) as JwtPayload;
-          expect(access.type).toBe('access');
-          expect(access.admin).toBe(false);
-          expect(access.username).toBe(validData.username);
-          const accessExp = Math.round(ms(SETTINGS.access_token_lifetime) / 1000);
-          const actualAccessExp = (access.exp as number) - (access.iat as number);
-          expect(isEqualWithErrorMargin(accessExp, actualAccessExp, 10)).toBe(true);
-        });
-    });
+        const refresh = decode(cookies.refresh_token) as JwtPayload;
+        expect(refresh.type).toBe('refresh');
+        const refreshExp = Math.round(ms(SETTINGS.refresh_token_inactivity_lifetime) / 1000);
+        const actualRefreshExp = (refresh.exp as number) - (refresh.iat as number);
+        expect(isEqualWithErrorMargin(refreshExp, actualRefreshExp, 60)).toBe(true);
+
+        const access = decode(cookies.access_token) as JwtPayload;
+        expect(access.type).toBe('access');
+        expect(access.admin).toBe(false);
+        expect(access.username).toBe(validData.username);
+        const accessExp = Math.round(ms(SETTINGS.access_token_lifetime) / 1000);
+        const actualAccessExp = (access.exp as number) - (access.iat as number);
+        expect(isEqualWithErrorMargin(accessExp, actualAccessExp, 10)).toBe(true);
+      }));
   });
 });
 
@@ -143,16 +124,16 @@ describe('DELETE /users/session (logout)', () => {
       .send(validData)
       .expect(201)
       .then((response) => {
-        const cookies = (response.headers['set-cookie'] as Array<string>).reduce((acc : Record<string,string>, cookie : string) => {
+        const cookies = (response.headers['set-cookie'] as Array<string>).reduce((acc : Record<string, string>, cookie : string) => {
           const [type, fullDescription] = cookie.split('=');
           const [value, ..._rest] = fullDescription.split(';');
           acc[type] = value;
           return acc;
         }, {});
-        
+
         accessToken = cookies.access_token;
         refreshToken = cookies.refresh_token;
-      })
+      });
   });
 
   afterEach(async () => {
@@ -232,16 +213,16 @@ describe('PUT /users/session (refresh)', () => {
       .send(validData)
       .expect(201)
       .then((response) => {
-        const cookies = (response.headers['set-cookie'] as Array<string>).reduce((acc : Record<string,string>, cookie : string) => {
+        const cookies = (response.headers['set-cookie'] as Array<string>).reduce((acc : Record<string, string>, cookie : string) => {
           const [type, fullDescription] = cookie.split('=');
           const [value, ..._rest] = fullDescription.split(';');
           acc[type] = value;
           return acc;
         }, {});
-        
+
         accessToken = cookies.access_token;
         refreshToken = cookies.refresh_token;
-      })
+      });
   });
 
   afterEach(async () => {
@@ -272,15 +253,13 @@ describe('PUT /users/session (refresh)', () => {
       });
   });
 
-  it('with an access token, returns an error', () => {
-    return request(app)
-      .put(url)
-      .set('Authorization', accessToken)
-      .expect(401)
-      .then((res) => {
-        expect(res.body.error.code).toBe('authorization_error');
-      });
-  });
+  it('with an access token, returns an error', () => request(app)
+    .put(url)
+    .set('Authorization', accessToken)
+    .expect(401)
+    .then((res) => {
+      expect(res.body.error.code).toBe('authorization_error');
+    }));
 
   it('with a valid token, returns a new, valid, token pair', async () => {
     await request(app)
@@ -296,7 +275,7 @@ describe('PUT /users/session (refresh)', () => {
       .set('Authorization', refreshToken)
       .expect(200)
       .then((res) => {
-        const cookies = (res.headers['set-cookie'] as Array<string>).reduce((acc : Record<string,string>, cookie : string) => {
+        const cookies = (res.headers['set-cookie'] as Array<string>).reduce((acc : Record<string, string>, cookie : string) => {
           const [type, fullDescription] = cookie.split('=');
           const [value, ..._rest] = fullDescription.split(';');
           acc[type] = value;

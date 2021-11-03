@@ -7,4 +7,4 @@ export default class HttpError extends ErrorWithCode {
     super({ message, code });
     this.status = status;
   }
-};
+}
