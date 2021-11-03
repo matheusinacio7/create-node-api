@@ -103,6 +103,7 @@ async function mainInterface(program: Command) {
       packageJson.changeScript('test', 'yarn gen_ec_keys && jest'),
       packageJson.changeScript('test:coverage', 'yarn gen_ec_keys && jest --coverage --verbose=false'),
       packageJson.addDependency('jest', true),
+      packageJson.addDependency('@jest/globals', true),
       packageJson.addDependency('@types/jest', true),
       packageJson.addDependency('ts-jest', true),
       packageJson.addDependency('@sinonjs/fake-timers', true),
