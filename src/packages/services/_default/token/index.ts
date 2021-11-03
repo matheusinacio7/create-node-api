@@ -134,7 +134,7 @@ const getNewIdPair = (refreshToken?: string) => {
     throw new AuthorizationError('Invalid token.');
   }
 
-  return [`${base}.r.${counter + 1}`, `${base}.r.${counter + 1}`];
+  return [`${base}.r.${counter + 1}`, `${base}.a.${counter + 1}`];
 };
 
 
