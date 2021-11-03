@@ -50,11 +50,18 @@ async function mainInterface(program: Command) {
   const createApp = Promise.all(
     [
       copyPackage('app', true),
+      packageJson.changeScript('lint', 'eslint -c .eslintrc.json --ext .ts,.js .'),
       packageJson.addDependency('express'),
       packageJson.addDependency('@types/express', true),
       packageJson.addDependency('cors'),
       packageJson.addDependency('@types/cors', true),
       packageJson.addDependency('helmet'),
+      packageJson.addDependency('@typescript-eslint/eslint-plugin', true),
+      packageJson.addDependency('@typescript-eslint/parser', true),
+      packageJson.addDependency('eslint', true),
+      packageJson.addDependency('eslint-config-airbnb-base', true),
+      packageJson.addDependency('eslint-import-resolver-typescript', true),
+      packageJson.addDependency('eslint-plugin-import', true),
     ]
   );
 

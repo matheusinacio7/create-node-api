@@ -23,7 +23,7 @@ const getIat = () => Math.round(new Date().getTime() / 1000);
 let privateKey : string;
 let publicKey : string;
 
-const ec_keys = {
+const ecKeys = {
   get private() {
     if (privateKey) return privateKey;
 
@@ -36,16 +36,16 @@ const ec_keys = {
 
     publicKey = fs.readFileSync('ec_public.pem', 'utf-8');
     return publicKey;
-  }
-}
+  },
+};
 
 const getSignConfig = (type: TokenType, id: string, expiresIn?: number) : SignOptions => {
   const SIGN_CONFIG : Record<TokenType, SignOptions> = {
-    'access': {
+    access: {
       algorithm: 'ES256',
       expiresIn: expiresIn || SETTINGS.access_token_lifetime,
     },
-    'refresh': {
+    refresh: {
       algorithm: 'ES256',
       expiresIn: expiresIn || SETTINGS.refresh_token_inactivity_lifetime,
     },
@@ -54,10 +54,12 @@ const getSignConfig = (type: TokenType, id: string, expiresIn?: number) : SignOp
   return { ...SIGN_CONFIG[type], jwtid: id };
 };
 
-const sign = (data: Object, type: TokenType, id: string, expiresIn?: number) => {
-  // console.log(getSignConfig(type, id));
-  return jwt.sign(data, ec_keys.private, getSignConfig(type, id, expiresIn));
-};
+const sign = (
+  data: Object,
+  type: TokenType,
+  id: string, expiresIn?: number,
+) => jwt.sign(data, ecKeys.private, getSignConfig(type, id, expiresIn));
+
 class Blacklist {
   #client;
 
@@ -94,13 +96,13 @@ class Blacklist {
     }
 
     // if a refresh token is used while invalid, it means a reuse, so the whole branch is invalidated
-    if (parseInt(await this.#client.HGET(branch, 'r') as string) >= counter) {
+    if (parseInt(await this.#client.HGET(branch, 'r') as string, 10) >= counter) {
       await this.invalidateTree(branch);
       throw new AuthorizationError('Invalid token.');
     }
 
     // access tokens can be invalid while the refresh token is not
-    if (type === 'a' && parseInt(await this.#client.HGET(branch, 'a') as string) >= counter) {
+    if (type === 'a' && parseInt(await this.#client.HGET(branch, 'a') as string, 10) >= counter) {
       throw new AuthorizationError('Invalid token.');
     }
   }
@@ -115,11 +117,11 @@ class Blacklist {
 }
 
 const getBranchData = (token: string) : [string, 'a' | 'r', number] => {
-  const { jti } = jwt.verify(token, ec_keys.public) as JwtPayload;
+  const { jti } = jwt.verify(token, ecKeys.public) as JwtPayload;
 
   const [base, type, counter] = (jti as string).split('.') as [string, 'a' | 'r', string];
 
-  return [base, type, parseInt(counter)];
+  return [base, type, parseInt(counter, 10)];
 };
 
 const getNewIdPair = (refreshToken?: string) => {
@@ -137,7 +139,6 @@ const getNewIdPair = (refreshToken?: string) => {
   return [`${base}.r.${counter + 1}`, `${base}.a.${counter + 1}`];
 };
 
-
 const blacklist = new Blacklist();
 blacklist.connect();
 
@@ -147,14 +148,14 @@ export const closeBlacklistServer = async () => {
 
 export const verifyAccessToken = async (token: string) : Promise<JwtPayload> => {
   try {
-    const payload = (jwt.verify(token, ec_keys.public) as JwtPayload);
+    const payload = (jwt.verify(token, ecKeys.public) as JwtPayload);
 
     if (payload.type !== 'access') {
       throw new AuthorizationError('Invalid token.');
     }
-  
+
     await blacklist.checkAndInvalidateOnReuse(...getBranchData(token));
-  
+
     return payload;
   } catch (err) {
     throw new AuthorizationError('Invalid token.');
@@ -163,7 +164,7 @@ export const verifyAccessToken = async (token: string) : Promise<JwtPayload> => 
 
 export const getTokenPair = (data: Object, refreshExp?: number, token?: string) => {
   const [rtid, atid] = getNewIdPair(token);
-  const refreshToken = sign({ ...data, type: 'refresh'}, 'refresh', rtid, refreshExp);
+  const refreshToken = sign({ ...data, type: 'refresh' }, 'refresh', rtid, refreshExp);
   const accessToken = sign({ ...data, type: 'access' }, 'access', atid);
 
   return { refreshToken, accessToken };
@@ -173,7 +174,7 @@ export const refreshTokenPair = async (refreshToken: string) => {
   let payload : JwtPayload = {};
 
   try {
-    payload = (jwt.verify(refreshToken, ec_keys.public) as JwtPayload);
+    payload = (jwt.verify(refreshToken, ecKeys.public) as JwtPayload);
   } catch {
     throw new AuthorizationError('Invalid token.');
   }
@@ -200,20 +201,20 @@ export const refreshTokenPair = async (refreshToken: string) => {
 
   const nextExp = getIat() + (ms(SETTINGS.refresh_token_inactivity_lifetime) / 1000);
 
-  let refreshExp : number | undefined = undefined;
+  let refreshExp : number | undefined;
 
   // if the absolute max exp is larger than the next inactivity exp, reduce inactivity lifetime
   if (nextExp > maxExp) {
     refreshExp = maxExp - getIat();
   }
-  
+
   delete payload.jti;
   delete payload.exp;
   delete payload.iat;
   delete payload.type;
 
   return getTokenPair(payload, refreshExp, refreshToken);
-}
+};
 
 const typeDict = {
   a: 'access',
@@ -230,5 +231,5 @@ export const revoke = async (token: string) => {
     return typeDict[branchData[1]];
   } catch {
     throw new AuthorizationError('Invalid token.');
-  } 
+  }
 };

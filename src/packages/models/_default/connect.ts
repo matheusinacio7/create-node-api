@@ -8,11 +8,11 @@ let connection : MongoClient;
 const connect = () => (db
   ? Promise.resolve(db)
   : MongoClient.connect((process.env.CONNECTION_STRING as string))
-      .then((newConnection) => {
-        connection = newConnection;
-        db = connection.db((process.env.DB_NAME as string));
-        return db;
-      }));
+    .then((newConnection) => {
+      connection = newConnection;
+      db = connection.db((process.env.DB_NAME as string));
+      return db;
+    }));
 
 export const disconnect = () => connection.close();
 

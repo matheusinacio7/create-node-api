@@ -1,5 +1,9 @@
 import { createClient } from 'redis';
-import type { Handler, Request, Response, NextFunction } from 'express';
+import type {
+  Handler,
+  Response,
+  NextFunction,
+} from 'express';
 
 const client = createClient();
 client.connect();
@@ -35,17 +39,17 @@ export const withCache : Handler = async (req, res, next) => {
   const bodyChunks : Buffer[] = [];
   let status : number;
 
-  res.status = function(chunk) {
+  res.status = function interceptStatus(chunk) {
     status = chunk;
     return originalStatus.apply(res, arguments as any);
-  }
+  };
 
-  res.write = function(chunk) {
+  res.write = function interceptWrite(chunk) {
     bodyChunks.push(chunk);
     return originalWrite.apply(res, arguments as any);
-  }
-  
-  res.end = async function(chunk) {
+  };
+
+  res.end = async function interceptEnd(chunk) {
     bodyChunks.push(chunk);
     const body = JSON.parse(Buffer.concat(bodyChunks).toString());
     const response = {
@@ -55,9 +59,9 @@ export const withCache : Handler = async (req, res, next) => {
     const cacheValue = JSON.stringify(response);
     await client.SET(cacheKey, cacheValue);
     await client.EXPIRE(cacheKey, options?.time || 30);
-    
+
     originalEnd.apply(res, arguments as any);
-  }
+  };
 
   next();
 };

@@ -17,7 +17,7 @@ const handleError : ErrorRequestHandler = (err, _req, res, _next) => {
 
   switch (err.constructor) {
     case InternalError:
-      console.log(err); // TODO create a server-side log file;
+      console.error(err); // TODO create a server-side log file;
       return res.status(500).json({ error: { message: err.message, code: err.code } });
     case AuthorizationError:
       return res.status(401).json({ error: { message: err.message, code: err.code } });
@@ -30,9 +30,9 @@ const handleError : ErrorRequestHandler = (err, _req, res, _next) => {
     case ValidationError:
       return res.status(422).json({ error: { message: err.message, code: err.code } });
     default:
-      console.log(err);
-      return res.status(500).json({ error: { message: 'An unexpected error ocurred.', code: 'unexpected_error' } });;
+      console.error(err);
+      return res.status(500).json({ error: { message: 'An unexpected error ocurred.', code: 'unexpected_error' } });
   }
-}
+};
 
 export default handleError;

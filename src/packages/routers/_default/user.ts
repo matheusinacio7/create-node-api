@@ -9,7 +9,10 @@ import { SETTINGS } from '@token';
 
 const router = Router();
 
-const setTokensOnCookies = ({ accessToken, refreshToken } : Record<string, string>, res: Response) => {
+const setTokensOnCookies = ({
+  accessToken,
+  refreshToken,
+} : Record<string, string>, res: Response) => {
   res.cookie('access_token', accessToken, {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
@@ -65,7 +68,7 @@ router.get('/me', validateToken, withCache, (_req, res, next) => {
   User.getByUsername(res.locals.username).then((info) => {
     res.status(200).json(info);
   })
-  .catch(next);
+    .catch(next);
 });
 
 export default router;

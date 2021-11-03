@@ -1,4 +1,6 @@
-import { describe, expect, it } from '@jest/globals';
+/* global afterAll */
+
+import { describe, it } from '@jest/globals';
 import request from 'supertest';
 
 import app from '../../app';
